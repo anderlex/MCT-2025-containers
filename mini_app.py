@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 DB_CONFIG = {
     'dbname': os.getenv('POSTGRES_DB', 'app'),
-    'user': os.getenv('POSTGRES_USER', 'user'),
+    'user': os.getenv('POSTGRES_USER', 'postgres'),
     'password': os.getenv('POSTGRES_PASSWORD', 'password'),
     'host': os.getenv('POSTGRES_HOST', 'db'),
     'port': os.getenv('POSTGRES_PORT', '5432')
@@ -69,6 +69,10 @@ def get_visits_count():
 
 init_db()
 
+@app.route('/')
+def home():
+    return 'Welcome to and3rlex mini-app!'
+
 @app.route('/ping')
 def ping():
     client_ip = request.remote_addr
@@ -98,4 +102,4 @@ def all_requests():
         return {'error': str(e)}, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5000)
