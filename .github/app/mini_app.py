@@ -41,7 +41,6 @@ def init_db():
                 print("Не удалось подключиться к БД после всех попыток")
 
 def log_request(client_ip, endpoint):
-    """Логирование запроса в БД"""
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
