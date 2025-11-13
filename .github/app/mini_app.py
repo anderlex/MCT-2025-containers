@@ -7,9 +7,9 @@ import time
 app = Flask(__name__)
 
 DB_CONFIG = {
-    'dbname': os.getenv('POSTGRES_DB', 'app_db'),
-    'user': os.getenv('POSTGRES_USER', 'app_user'),
-    'password': os.getenv('POSTGRES_PASSWORD', 'app_password'),
+    'dbname': os.getenv('POSTGRES_DB', 'app'),
+    'user': os.getenv('POSTGRES_USER', 'user'),
+    'password': os.getenv('POSTGRES_PASSWORD', 'password'),
     'host': os.getenv('POSTGRES_HOST', 'db'),
     'port': os.getenv('POSTGRES_PORT', '5432')
 }
