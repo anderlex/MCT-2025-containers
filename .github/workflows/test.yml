@@ -12,8 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose curl jq
+
       - name: Start services
-        run: docker compose up -d
+        run: docker-compose up -d --build
 
       - name: Wait for DB initialization
         run: |
