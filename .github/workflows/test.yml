@@ -20,7 +20,7 @@ jobs:
 
       - name: Start Dev Environment
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+          docker-compose --profile dev up -d --build
 
       - name: Wait for services
         run: sleep 10
@@ -47,6 +47,12 @@ jobs:
             exit 1
           fi
           
+          visits_after=$(curl -s http://localhost:5000/visits)
+          if [ "$visits_after" != "-1" ]; then
+            echo "Should still be -1 after ping in dev mode, got: $visits_after"
+            exit 1
+          fi
+          
           echo "Dev environment tests passed"
 
       - name: Show logs on failure
@@ -60,7 +66,6 @@ jobs:
   test-prod:
     name: Test Prod Environment  
     runs-on: ubuntu-latest
-    needs: test-dev
 
     steps:
       - name: Checkout code
@@ -73,12 +78,12 @@ jobs:
 
       - name: Start Prod Environment
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+          docker-compose --profile prod up -d --build
 
       - name: Wait for DB initialization
         run: |
           timeout=60
-          while ! docker-compose logs init-db | grep -q "Database initialization completed successfully"; do
+          while ! docker-compose logs init-db 2>/dev/null | grep -q "Database initialization completed successfully"; do
             ((timeout--))
             if [ $timeout -eq 0 ]; then
               echo "DB initialization failed"
@@ -91,27 +96,31 @@ jobs:
 
       - name: Wait for Redis
         run: |
-          timeout=60
-          while ! docker-compose ps redis | grep -q "healthy"; do
+          timeout=30
+          while ! docker-compose ps redis 2>/dev/null | grep -q "healthy"; do
             ((timeout--))
             if [ $timeout -eq 0 ]; then
               echo "Redis not healthy"
+              docker-compose logs redis
               exit 1
             fi
             sleep 2
           done
+          echo "Redis ready"
 
       - name: Wait for Web
         run: |
-          timeout=60
+          timeout=30
           while ! curl -f http://localhost:80/health >/dev/null 2>&1; do
             ((timeout--))
             if [ $timeout -eq 0 ]; then
               echo "Web not ready"
+              docker-compose logs web
               exit 1
             fi
             sleep 2
           done
+          echo "Web ready"
 
       - name: Test Prod Mode
         run: |
@@ -128,10 +137,11 @@ jobs:
           fi
           
           curl -s http://localhost:80/ping > /dev/null
+          sleep 2
           visits2=$(curl -s http://localhost:80/visits)
           
-          if [ "$visits1" -ge "$visits2" ]; then
-            echo "Visit count should increase after ping"
+          if [ "$visits2" -le "$visits1" ]; then
+            echo "Visit count should increase after ping (was: $visits1, now: $visits2)"
             exit 1
           fi
           
