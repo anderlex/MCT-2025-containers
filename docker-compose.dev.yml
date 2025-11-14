@@ -6,10 +6,7 @@ services:
       - "5000:5000"
     depends_on:
       - db
+    profiles: [dev]
 
-  # В dev отключаем ненужные сервисы
-  init-db:
-    profiles: ["skip"]
-  
-  redis:
-    profiles: ["skip"]
+  db:
+    profiles: [dev]
