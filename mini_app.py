@@ -6,8 +6,6 @@ import time
 import redis
 import json
 
-APP_MODE = os.getenv('APP_MODE', 'prod')
-
 app = Flask(__name__)
 
 DB_CONFIG = {
@@ -77,7 +75,7 @@ def ping():
 
 @app.route('/visits')
 def visits():
-    if os.getenv('APP_MODE') == 'dev':
+    if os.getenv('APP_MODE') == "dev":
         return '-1'
     count = get_visits_count()
     return str(count)
@@ -105,7 +103,7 @@ def clear_cache():
 
 @app.route('/health')
 def health():
-    return {'status': 'healthy', 'mode': APP_MODE}
+    return {'status': 'healthy', 'mode': os.getenv('APP_MODE')}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
