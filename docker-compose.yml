@@ -18,6 +18,29 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    profiles: [dev]
+
+  web-prod:
+    build: .
+    environment:
+      - FLASK_ENV=production
+      - APP_MODE=prod
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+    ports:
+      - "80:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      init-db:
+        condition: service_healthy
+    profiles: [prod]
 
   db:
     image: postgres:13
@@ -32,7 +55,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  
+    profiles: [prod]
+
   init-db:
     build: .
     environment:
@@ -45,7 +69,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/init_complete || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    profiles: [prod]
+
   redis:
     image: redis:7-alpine
     healthcheck:
@@ -53,6 +83,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    profiles: [prod]
 
 volumes:
   postgres_data:

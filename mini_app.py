@@ -77,6 +77,8 @@ def ping():
 
 @app.route('/visits')
 def visits():
+    if os.getenv('APP_MODE') == 'dev':
+        return '-1'
     count = get_visits_count()
     return str(count)
 
