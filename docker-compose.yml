@@ -7,18 +7,41 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=development
+      - APP_MODE=dev
       - POSTGRES_DB=app
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    profiles: [dev]
+
+  web-prod:
+    build: .
+    environment:
+      - FLASK_ENV=production
+      - APP_MODE=prod
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+    ports:
+      - "80:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
+    profiles: [prod]
 
   db:
     image: postgres:13
@@ -33,7 +56,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  
+    profiles: [dev, prod]
+
   init-db:
     build: .
     environment:
@@ -46,7 +70,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  
+    profiles: [prod]
+
   redis:
     image: redis:7-alpine
     healthcheck:
@@ -54,6 +79,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    profiles: [dev, prod]
 
 volumes:
   postgres_data:

@@ -75,6 +75,8 @@ def ping():
 
 @app.route('/visits')
 def visits():
+    if os.getenv('APP_MODE') == "dev":
+        return '-1'
     count = get_visits_count()
     return str(count)
 
@@ -98,6 +100,10 @@ def all_requests():
 def clear_cache():
     redis_client.flushdb()
     return 'Cache cleared'
+
+@app.route('/health')
+def health():
+    return {'status': 'healthy', 'mode': os.getenv('APP_MODE')}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
