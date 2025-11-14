@@ -55,7 +55,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    profiles: [prod]
+    profiles: [dev, prod]
 
   init-db:
     build: .
@@ -83,7 +83,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    profiles: [prod]
+    profiles: [dev, prod]
 
 volumes:
   postgres_data:
